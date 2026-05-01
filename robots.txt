@@ -3,7 +3,7 @@ Allow: /
 Crawl-delay: 1
 
 # Sitemap location
-Sitemap: https://not-a-human.github.io/sitemap.xml
+Sitemap: https://aviesinar.com/sitemap.xml
 
 # Specific bot permissions
 User-agent: Googlebot
