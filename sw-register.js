@@ -12,7 +12,7 @@ if ("serviceWorker" in navigator) {
 
       console.log(
         "✅ Service Worker registered successfully:",
-        registration.scope
+        registration.scope,
       );
 
       // Handle service worker updates
@@ -23,9 +23,8 @@ if ("serviceWorker" in navigator) {
         newWorker?.addEventListener("statechange", () => {
           if (newWorker.state === "installed") {
             if (navigator.serviceWorker.controller) {
-              // New service worker available, show update notification
-              console.log("🆕 New content available, refresh to update");
-              showUpdateAvailable();
+              // Immediately activate the new SW so stale chunks are replaced
+              newWorker.postMessage({ type: "SKIP_WAITING" });
             } else {
               // Service worker installed for the first time
               console.log("💾 Content cached for offline use");
@@ -33,6 +32,11 @@ if ("serviceWorker" in navigator) {
             }
           }
         });
+      });
+
+      // Reload the page when a new SW takes control so fresh chunks are used
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
       });
 
       // Handle service worker messages
@@ -120,7 +124,7 @@ function updateOnlineStatus(isOnline) {
   window.dispatchEvent(
     new CustomEvent("onlinestatuschange", {
       detail: { isOnline },
-    })
+    }),
   );
 }
 

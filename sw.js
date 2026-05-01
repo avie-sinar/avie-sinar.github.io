@@ -7,7 +7,7 @@
  * wedding-card's own service worker to handle its offline functionality.
  */
 
-const CACHE_VERSION = "portfolio-v1.0.0";
+const CACHE_VERSION = "portfolio-v1.0.1";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGES_CACHE = `${CACHE_VERSION}-images`;
@@ -62,8 +62,8 @@ self.addEventListener("install", (event) => {
               new Request(url, {
                 credentials: "same-origin",
                 cache: "reload",
-              })
-          )
+              }),
+          ),
         );
       }),
       // Pre-cache critical dynamic assets
@@ -71,8 +71,8 @@ self.addEventListener("install", (event) => {
         console.log("🖼️ Pre-caching images");
         return cache.addAll(
           DYNAMIC_ASSETS.map(
-            (url) => new Request(url, { credentials: "same-origin" })
-          )
+            (url) => new Request(url, { credentials: "same-origin" }),
+          ),
         );
       }),
     ])
@@ -82,8 +82,15 @@ self.addEventListener("install", (event) => {
       })
       .catch((error) => {
         console.error("❌ Installation failed:", error);
-      })
+      }),
   );
+});
+
+// Respond to SKIP_WAITING message from the page so new SW activates immediately
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 // Activate event - clean up old caches and claim clients
@@ -107,14 +114,14 @@ self.addEventListener("activate", (event) => {
               console.log("🗑️ Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          })
+          }),
         );
       }),
       // Take control of all clients immediately
       self.clients.claim(),
     ]).then(() => {
       console.log("🏃‍♂️ Service Worker took control of all pages");
-    })
+    }),
   );
 });
 
@@ -137,7 +144,7 @@ self.addEventListener("fetch", (event) => {
   if (url.pathname.startsWith("/wedding-card")) {
     console.log(
       "🎩 Skipping wedding-card request for its own service worker:",
-      url.pathname
+      url.pathname,
     );
     return;
   }
@@ -145,6 +152,8 @@ self.addEventListener("fetch", (event) => {
   // Handle different request types with appropriate strategies
   if (isNavigationRequest(request)) {
     event.respondWith(handleNavigation(request));
+  } else if (isNextJsChunk(request)) {
+    event.respondWith(handleNextJsChunk(request));
   } else if (isStaticAsset(request)) {
     event.respondWith(handleStaticAsset(request));
   } else if (isImageRequest(request)) {
@@ -166,10 +175,18 @@ function isNavigationRequest(request) {
 function isStaticAsset(request) {
   const url = new URL(request.url);
   return (
-    url.pathname.includes("/_next/static/") ||
     url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".js") ||
+    url.pathname.includes("/_next/static/media/") ||
     url.pathname === "/manifest.json"
+  );
+}
+
+function isNextJsChunk(request) {
+  const url = new URL(request.url);
+  return (
+    url.pathname.includes("/_next/static/chunks/") ||
+    url.pathname.includes("/_next/static/js/") ||
+    url.pathname.endsWith(".js")
   );
 }
 
@@ -230,6 +247,26 @@ async function handleNavigation(request) {
   }
 }
 
+async function handleNextJsChunk(request) {
+  // Network first for JS chunks — they change between builds
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200) {
+      const cache = await caches.open(DYNAMIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    // Fall back to cache only if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log("📦 Serving JS chunk from cache (offline):", request.url);
+      return cachedResponse;
+    }
+    throw error;
+  }
+}
+
 async function handleStaticAsset(request) {
   const url = new URL(request.url);
 
@@ -238,7 +275,7 @@ async function handleStaticAsset(request) {
     return fetch(request);
   }
 
-  // Cache first strategy for portfolio static assets
+  // Cache first strategy for portfolio static assets (CSS, media — immutable)
   const cachedResponse = await caches.match(request);
   if (cachedResponse) {
     console.log("📦 Serving static asset from cache:", request.url);
@@ -411,7 +448,7 @@ async function syncContactForms() {
 
     const offlineData = await getOfflineData("contact-forms");
     const pendingForms = offlineData.filter(
-      (form) => form.status === "pending"
+      (form) => form.status === "pending",
     );
 
     for (const form of pendingForms) {
@@ -569,7 +606,7 @@ self.addEventListener("push", (event) => {
   }
 
   event.waitUntil(
-    self.registration.showNotification("� Portfolio Update", notificationData)
+    self.registration.showNotification("� Portfolio Update", notificationData),
   );
 });
 
@@ -599,7 +636,7 @@ self.addEventListener("notificationclick", (event) => {
           if (clients.openWindow) {
             return clients.openWindow(urlToOpen);
           }
-        })
+        }),
     );
   }
 });
@@ -618,7 +655,7 @@ self.addEventListener("quotaexceeded", (event) => {
         FONTS_CACHE,
       ];
       const oldCaches = cacheNames.filter(
-        (name) => !currentCaches.includes(name)
+        (name) => !currentCaches.includes(name),
       );
 
       // Delete old caches
@@ -633,6 +670,6 @@ self.addEventListener("quotaexceeded", (event) => {
         const keysToDelete = dynamicKeys.slice(0, dynamicKeys.length - 50);
         await Promise.all(keysToDelete.map((key) => dynamicCache.delete(key)));
       }
-    })
+    }),
   );
 });
