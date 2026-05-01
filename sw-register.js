@@ -3,6 +3,15 @@
  * Registers the service worker and handles updates
  */
 
+const IS_PROD =
+  window.location.hostname !== "localhost" &&
+  window.location.hostname !== "127.0.0.1";
+
+if (IS_PROD) {
+  // Keep production console clean for SW registration/online state logs.
+  window.console.log = () => {};
+}
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {

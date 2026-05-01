@@ -14,6 +14,15 @@ const IMAGES_CACHE = `${CACHE_VERSION}-images`;
 const FONTS_CACHE = `${CACHE_VERSION}-fonts`;
 const OFFLINE_URL = "/offline";
 
+const IS_PROD =
+  self.location.hostname !== "localhost" &&
+  self.location.hostname !== "127.0.0.1";
+
+if (IS_PROD) {
+  // Keep production console clean for SW lifecycle/cache logs.
+  self.console.log = () => {};
+}
+
 // Core files to cache immediately
 const STATIC_ASSETS = [
   "/",
