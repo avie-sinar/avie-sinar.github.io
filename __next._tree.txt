@@ -9,4 +9,4 @@
 :HL["/_next/static/css/b37f401c88b61da5.css","style"]
 :HL["/_next/static/css/996392719044df73.css","style"]
 :HL["/_next/static/css/b605b85364ccb32d.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"qHsJZndj91Lq6DttGU795"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"vy4m54svy5x6gNIbZURFZ"}
