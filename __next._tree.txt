@@ -5,5 +5,5 @@
 :HL["/_next/static/media/db234bd00cda6a96-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/css/4df934eb4dc25344.css","style"]
 :HL["/_next/static/css/3962c9bd130b2162.css","style"]
-:HL["/_next/static/css/722597c7e917b65e.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"QPE0ry2nNIJGl2RS6nglc"}
+:HL["/_next/static/css/86ff32116500b3bb.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"uPcsEjLCYWcUFFvc1Cb25"}
